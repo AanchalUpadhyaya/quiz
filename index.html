@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .quiz-container, .result-container, .leaderboard-container {
+            display: none;
+        }
+
+        .question {
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .options {
+            margin-bottom: 20px;
+        }
+
+        .option {
+            display: block;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            background-color: #eee;
+        }
+
+        .option.selected {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .progress {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .result-container h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .score {
+            font-size: 24px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .leaderboard {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .leaderboard th, .leaderboard td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .leaderboard th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .leaderboard tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .leaderboard tr:hover {
+            background-color: #e9e9e9;
+        }
+
+        .restart-btn {
+            background-color: #2ecc71;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Name Entry Section -->
+        <div class="name-entry" id="nameEntry">
+            <h1>Welcome to the Quiz!</h1>
+            <div class="form-group">
+                <label for="playerName">Enter your name:</label>
+                <input type="text" id="playerName" placeholder="Your name">
+            </div>
+            <button class="btn" id="startQuiz">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="quiz-container" id="quizContainer">
+            <div class="progress" id="progress">Question 1 of 5</div>
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+            <button class="btn" id="nextQuestion">Next Question</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-container" id="resultContainer">
+            <h2>Quiz Completed!</h2>
+            <div class="score" id="score"></div>
+            <button class="btn restart-btn" id="viewLeaderboard">View Leaderboard</button>
+        </div>
+
+        <!-- Leaderboard Section -->
+        <div class="leaderboard-container" id="leaderboardContainer">
+            <h2>Leaderboard</h2>
+            <table class="leaderboard" id="leaderboard">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                </tbody>
+            </table>
+            <button class="btn restart-btn" id="restartQuiz">Take Quiz Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions
+        const allQuestions = [
+            {
+                question: "What is the capital of France?",
+                options: ["London", "Berlin", "Paris", "Madrid"],
+                answer: "Paris"
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                answer: "Mars"
+            },
+            {
+                question: "What is the largest mammal in the world?",
+                options: ["Elephant", "Blue Whale", "Giraffe", "Polar Bear"],
+                answer: "Blue Whale"
+            },
+            {
+                question: "Which language runs in a web browser?",
+                options: ["Java", "C", "Python", "JavaScript"],
+                answer: "JavaScript"
+            },
+            {
+                question: "What year was JavaScript launched?",
+                options: ["1996", "1995", "1994", "none of the above"],
+                answer: "1995"
+            },
+            {
+                question: "What does HTML stand for?",
+                options: [
+                    "Hypertext Markup Language",
+                    "Hypertext Machine Language",
+                    "Hypertext Marking Language",
+                    "Hightext Machine Language"
+                ],
+                answer: "Hypertext Markup Language"
+            },
+            {
+                question: "Which of these is not a programming language?",
+                options: ["Python", "HTML", "Java", "C++"],
+                answer: "HTML"
+            },
+            {
+                question: "What is 2 + 2?",
+                options: ["3", "4", "5", "6"],
+                answer: "4"
+            },
+            {
+                question: "Which country won the FIFA World Cup in 2018?",
+                options: ["Brazil", "Germany", "France", "Argentina"],
+                answer: "France"
+            },
+            {
+                question: "Who painted the Mona Lisa?",
+                options: [
+                    "Vincent van Gogh",
+                    "Pablo Picasso",
+                    "Leonardo da Vinci",
+                    "Michelangelo"
+                ],
+                answer: "Leonardo da Vinci"
+            }
+        ];
+
+        // DOM elements
+        const nameEntry = document.getElementById('nameEntry');
+        const quizContainer = document.getElementById('quizContainer');
+        const resultContainer = document.getElementById('resultContainer');
+        const leaderboardContainer = document.getElementById('leaderboardContainer');
+        const startQuizBtn = document.getElementById('startQuiz');
+        const nextQuestionBtn = document.getElementById('nextQuestion');
+        const viewLeaderboardBtn = document.getElementById('viewLeaderboard');
+        const restartQuizBtn = document.getElementById('restartQuiz');
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const progressElement = document.getElementById('progress');
+        const scoreElement = document.getElementById('score');
+        const leaderboardBody = document.getElementById('leaderboardBody');
+
+        // Quiz variables
+        let playerName = '';
+        let selectedQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        // Start quiz when name is entered
+        startQuizBtn.addEventListener('click', () => {
+            playerName = document.getElementById('playerName').value.trim();
+            if (playerName === '') {
+                alert('Please enter your name to start the quiz.');
+                return;
+            }
+
+            // Select 5 random questions
+            selectedQuestions = getRandomQuestions(allQuestions, 5);
+            nameEntry.style.display = 'none';
+            quizContainer.style.display = 'block';
+            showQuestion();
+        });
+
+        // Next question button
+        nextQuestionBtn.addEventListener('click', () => {
+            if (selectedOption === null) {
+                alert('Please select an option before proceeding.');
+                return;
+            }
+
+            // Check if answer is correct
+            const currentQuestion = selectedQuestions[currentQuestionIndex];
+            if (selectedOption.textContent === currentQuestion.answer) {
+                score++;
+            }
+
+            // Move to next question or show results
+            currentQuestionIndex++;
+            if (currentQuestionIndex < selectedQuestions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        // View leaderboard button
+        viewLeaderboardBtn.addEventListener('click', () => {
+            resultContainer.style.display = 'none';
+            leaderboardContainer.style.display = 'block';
+            updateLeaderboard();
+        });
+
+        // Restart quiz button
+        restartQuizBtn.addEventListener('click', () => {
+            leaderboardContainer.style.display = 'none';
+            nameEntry.style.display = 'block';
+            resetQuiz();
+        });
+
+        // Helper function to get random questions
+        function getRandomQuestions(questions, count) {
+            const shuffled = [...questions].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        // Show current question
+        function showQuestion() {
+            resetState();
+            const currentQuestion = selectedQuestions[currentQuestionIndex];
+            questionElement.textContent = currentQuestion.question;
+
+            // Update progress
+            progressElement.textContent = `Question ${currentQuestionIndex + 1} of ${selectedQuestions.length}`;
+
+            // Create options
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option');
+                button.addEventListener('click', () => selectOption(button));
+                optionsElement.appendChild(button);
+            });
+        }
+
+        // Reset question state
+        function resetState() {
+            selectedOption = null;
+            while (optionsElement.firstChild) {
+                optionsElement.removeChild(optionsElement.firstChild);
+            }
+        }
+
+        // Select an option
+        function selectOption(button) {
+            // Remove selected class from all options
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            // Add selected class to clicked option
+            button.classList.add('selected');
+            selectedOption = button;
+        }
+
+        // Show results
+        function showResults() {
+            quizContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            scoreElement.textContent = `You scored ${score} out of ${selectedQuestions.length}`;
+
+            // Add to leaderboard
+            leaderboard.push({ name: playerName, score: score });
+            leaderboard.sort((a, b) => b.score - a.score);
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
+
+        // Update leaderboard
+        function updateLeaderboard() {
+            leaderboardBody.innerHTML = '';
+            leaderboard.slice(0, 10).forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${entry.name}</td>
+                    <td>${entry.score}</td>
+                `;
+                leaderboardBody.appendChild(row);
+            });
+        }
+
+        // Reset quiz
+        function resetQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedOption = null;
+            document.getElementById('playerName').value = '';
+        }
+    </script>
+</body>
+</html>
